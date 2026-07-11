@@ -1,7 +1,7 @@
 package com.inventory.controller;
 
-import com.inventory.dto.ProductRequest;
-import com.inventory.dto.ProductResponse;
+import com.inventory.dto.request.ProductRequest;
+import com.inventory.dto.response.ProductResponse;
 import com.inventory.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;

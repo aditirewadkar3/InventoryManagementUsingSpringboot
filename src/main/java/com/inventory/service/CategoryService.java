@@ -1,20 +1,20 @@
 package com.inventory.service;
 
-import com.inventory.dto.CategoryRequest;
-import com.inventory.dto.CategoryResponse;
+import com.inventory.dto.request.CategoryRequest;
+import com.inventory.dto.response.CategoryResponse;
 
 import java.util.List;
 
 public interface CategoryService {
 
-    CategoryResponse createCategory(CategoryRequest request);
+    CategoryResponse create(CategoryRequest request);
 
-    List<CategoryResponse> getAllCategories();
+    CategoryResponse getById(Long id);
 
-    CategoryResponse getCategoryById(Long id);
+    List<CategoryResponse> getAll();
 
-    CategoryResponse updateCategory(Long id, CategoryRequest request);
+    CategoryResponse update(Long id, CategoryRequest request);
 
-    void deleteCategory(Long id);
+    void delete(Long id);
 
 }

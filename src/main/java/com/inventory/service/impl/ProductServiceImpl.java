@@ -1,6 +1,7 @@
 package com.inventory.service.impl;
 
-import com.inventory.dto.*;
+import com.inventory.dto.request.ProductRequest;
+import com.inventory.dto.response.ProductResponse;
 import com.inventory.entity.*;
 import com.inventory.exception.*;
 import com.inventory.repository.*;
