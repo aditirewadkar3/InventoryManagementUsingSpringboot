@@ -1,103 +1,108 @@
 package com.inventory.service.impl;
 
+import com.inventory.constant.AppConstants;
 import com.inventory.dto.request.ProductRequest;
 import com.inventory.dto.response.ProductResponse;
-import com.inventory.entity.*;
-import com.inventory.exception.*;
-import com.inventory.repository.*;
+import com.inventory.entity.Category;
+import com.inventory.entity.Product;
+import com.inventory.exception.ResourceNotFoundException;
+import com.inventory.mapper.ProductMapper;
+import com.inventory.repository.CategoryRepository;
+import com.inventory.repository.ProductRepository;
 import com.inventory.service.ProductService;
+import com.inventory.util.BarcodeGenerator;
+import com.inventory.util.QrCodeGenerator;
+import com.inventory.util.SkuGenerator;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
-public class ProductServiceImpl
-        implements ProductService {
+@RequiredArgsConstructor
+public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
+
     private final CategoryRepository categoryRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository,
-                              CategoryRepository categoryRepository){
+    private final ProductMapper productMapper;
 
-        this.productRepository=productRepository;
-        this.categoryRepository=categoryRepository;
-    }
+    private final SkuGenerator skuGenerator;
+
+    private final BarcodeGenerator barcodeGenerator;
+
+    private final QrCodeGenerator qrCodeGenerator;
 
     @Override
-    public ProductResponse create(ProductRequest request){
+    public ProductResponse create(ProductRequest request) {
 
-        Category category=categoryRepository.findById(
-                        request.getCategoryId())
-                .orElseThrow(()->
-                        new ResourceNotFoundException(
-                                "Category Not Found"));
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(AppConstants.CATEGORY_NOT_FOUND));
 
-        Product product=new Product();
-
-        product.setName(request.getName());
-
-        product.setSku(UUID.randomUUID()
-                .toString()
-                .substring(0,8)
-                .toUpperCase());
-
-        product.setSellingPrice(request.getSellingPrice());
-
-        product.setCostPrice(request.getCostPrice());
-
-        product.setDescription(request.getDescription());
-
-        product.setCategory(category);
-
-        Product saved=productRepository.save(product);
-
-        return new ProductResponse(
-                saved.getId(),
-                saved.getName(),
-                saved.getSku(),
-                saved.getSellingPrice(),
-                saved.getCostPrice(),
-                saved.getDescription(),
-                saved.getCategory().getName()
+        String sku = skuGenerator.generateSku(
+                request.getName(),
+                productRepository.count()
         );
+
+        String barcode = barcodeGenerator.generateBarcode(sku);
+
+        String qr = qrCodeGenerator.generateQrCode(
+                sku,
+                "Name: " + request.getName()
+                        + "\nSKU: " + sku
+                        + "\nSelling Price: " + request.getSellingPrice()
+        );
+
+        Product product = Product.builder()
+                .name(request.getName())
+                .sku(sku)
+                .sellingPrice(request.getSellingPrice())
+                .costPrice(request.getCostPrice())
+                .description(request.getDescription())
+                .barcode(barcode)
+                .qrCode(qr)
+                .category(category)
+                .build();
+
+        Product savedProduct = productRepository.save(product);
+
+        return productMapper.toResponse(savedProduct);
+
     }
 
     @Override
-    public List<ProductResponse> getAll(){
+    public ProductResponse getById(Long id) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(AppConstants.PRODUCT_NOT_FOUND));
+
+        return productMapper.toResponse(product);
+
+    }
+
+    @Override
+    public List<ProductResponse> getAll() {
 
         return productRepository.findAll()
                 .stream()
-                .map(this::mapToResponse)
+                .map(productMapper::toResponse)
                 .toList();
+
     }
 
     @Override
-    public ProductResponse getById(Long id){
+    public ProductResponse update(Long id, ProductRequest request) {
 
-        Product product=productRepository.findById(id)
-                .orElseThrow(()->
-                        new ResourceNotFoundException(
-                                "Product Not Found"));
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(AppConstants.PRODUCT_NOT_FOUND));
 
-        return mapToResponse(product);
-    }
-
-    @Override
-    public ProductResponse update(Long id,
-                                  ProductRequest request){
-
-        Product product=productRepository.findById(id)
-                .orElseThrow(()->
-                        new ResourceNotFoundException(
-                                "Product Not Found"));
-
-        Category category=categoryRepository.findById(
-                        request.getCategoryId())
-                .orElseThrow(()->
-                        new ResourceNotFoundException(
-                                "Category Not Found"));
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(AppConstants.CATEGORY_NOT_FOUND));
 
         product.setName(request.getName());
         product.setSellingPrice(request.getSellingPrice());
@@ -105,31 +110,21 @@ public class ProductServiceImpl
         product.setDescription(request.getDescription());
         product.setCategory(category);
 
-        return mapToResponse(
-                productRepository.save(product));
+        Product updated = productRepository.save(product);
+
+        return productMapper.toResponse(updated);
+
     }
 
     @Override
-    public void delete(Long id){
+    public void delete(Long id) {
 
-        Product product=productRepository.findById(id)
-                .orElseThrow(()->
-                        new ResourceNotFoundException(
-                                "Product Not Found"));
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(AppConstants.PRODUCT_NOT_FOUND));
 
         productRepository.delete(product);
+
     }
 
-    private ProductResponse mapToResponse(Product p){
-
-        return new ProductResponse(
-                p.getId(),
-                p.getName(),
-                p.getSku(),
-                p.getSellingPrice(),
-                p.getCostPrice(),
-                p.getDescription(),
-                p.getCategory().getName()
-        );
-    }
 }

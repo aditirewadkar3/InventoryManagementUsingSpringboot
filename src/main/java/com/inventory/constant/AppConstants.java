@@ -20,4 +20,13 @@ public final class AppConstants {
 
     public static final String CATEGORY_ALREADY_EXISTS = "Category already exists";
     public static final String PRODUCT_ALREADY_EXISTS = "Product already exists";
+    public static final String PRODUCT_FETCHED = "Product fetched successfully";
+    public static final String PRODUCTS_FETCHED = "Products fetched successfully";
+
+    public static final String WAREHOUSE_CREATED = "Warehouse created successfully";
+    public static final String WAREHOUSE_UPDATED = "Warehouse updated successfully";
+    public static final String WAREHOUSE_DELETED = "Warehouse deleted successfully";
+
+    public static final String WAREHOUSE_NOT_FOUND = "Warehouse not found";
+    public static final String WAREHOUSE_ALREADY_EXISTS = "Warehouse already exists";
 }

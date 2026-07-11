@@ -1,55 +1,92 @@
 package com.inventory.controller;
 
+import com.inventory.constant.ApiResponse;
+import com.inventory.constant.AppConstants;
 import com.inventory.dto.request.ProductRequest;
 import com.inventory.dto.response.ProductResponse;
 import com.inventory.service.ProductService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
+@RequiredArgsConstructor
 public class ProductController {
 
-    private final ProductService service;
-
-    public ProductController(ProductService service){
-        this.service=service;
-    }
+    private final ProductService productService;
 
     @PostMapping
-    public ProductResponse create(
-            @Valid @RequestBody ProductRequest request){
+    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
+            @Valid @RequestBody ProductRequest request) {
 
-        return service.create(request);
-    }
+        ProductResponse response = productService.create(request);
 
-    @GetMapping
-    public List<ProductResponse> getAll(){
-
-        return service.getAll();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.<ProductResponse>builder()
+                        .success(true)
+                        .message(AppConstants.PRODUCT_CREATED)
+                        .data(response)
+                        .build());
     }
 
     @GetMapping("/{id}")
-    public ProductResponse getById(
-            @PathVariable Long id){
+    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(
+            @PathVariable Long id) {
 
-        return service.getById(id);
+        ProductResponse response = productService.getById(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.<ProductResponse>builder()
+                        .success(true)
+                        .message("Product fetched successfully")
+                        .data(response)
+                        .build());
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts() {
+
+        List<ProductResponse> response = productService.getAll();
+
+        return ResponseEntity.ok(
+                ApiResponse.<List<ProductResponse>>builder()
+                        .success(true)
+                        .message("Products fetched successfully")
+                        .data(response)
+                        .build());
     }
 
     @PutMapping("/{id}")
-    public ProductResponse update(
+    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
             @PathVariable Long id,
-            @Valid @RequestBody ProductRequest request){
+            @Valid @RequestBody ProductRequest request) {
 
-        return service.update(id,request);
+        ProductResponse response = productService.update(id, request);
+
+        return ResponseEntity.ok(
+                ApiResponse.<ProductResponse>builder()
+                        .success(true)
+                        .message(AppConstants.PRODUCT_UPDATED)
+                        .data(response)
+                        .build());
     }
 
     @DeleteMapping("/{id}")
-    public void delete(
-            @PathVariable Long id){
+    public ResponseEntity<ApiResponse<Void>> deleteProduct(
+            @PathVariable Long id) {
 
-        service.delete(id);
+        productService.delete(id);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .success(true)
+                        .message(AppConstants.PRODUCT_DELETED)
+                        .data(null)
+                        .build());
     }
 }
