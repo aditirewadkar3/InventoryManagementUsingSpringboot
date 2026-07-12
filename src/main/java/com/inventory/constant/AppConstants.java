@@ -29,4 +29,16 @@ public final class AppConstants {
 
     public static final String WAREHOUSE_NOT_FOUND = "Warehouse not found";
     public static final String WAREHOUSE_ALREADY_EXISTS = "Warehouse already exists";
+
+    public static final String INVENTORY_CREATED = "Inventory created successfully";
+
+    public static final String STOCK_IN_SUCCESS = "Stock added successfully";
+
+    public static final String STOCK_OUT_SUCCESS = "Stock removed successfully";
+
+    public static final String TRANSFER_SUCCESS = "Stock transferred successfully";
+
+    public static final String INVENTORY_NOT_FOUND = "Inventory not found";
+
+    public static final String INSUFFICIENT_STOCK = "Insufficient stock";
 }

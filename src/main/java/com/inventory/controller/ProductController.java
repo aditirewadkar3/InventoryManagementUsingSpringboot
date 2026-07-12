@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -88,5 +91,46 @@ public class ProductController {
                         .message(AppConstants.PRODUCT_DELETED)
                         .data(null)
                         .build());
+    }
+    @GetMapping("/export")
+    public ResponseEntity<InputStreamResource> exportProducts() {
+
+        InputStreamResource file =
+                new InputStreamResource(
+                        productService.exportProducts());
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=products.xlsx")
+                .body(file);
+    }
+
+
+    @PostMapping("/import")
+    public ResponseEntity<ApiResponse<Void>> importProducts(
+            @RequestParam("file") MultipartFile file) {
+
+        productService.importProducts(file);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Void>builder()
+                        .success(true)
+                        .message("Products imported successfully")
+                        .data(null)
+                        .build());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> search(
+            @RequestParam String keyword){
+
+        return ResponseEntity.ok(
+                ApiResponse.<List<ProductResponse>>builder()
+                        .success(true)
+                        .message("Search completed")
+                        .data(productService.search(keyword))
+                        .build());
+
     }
 }
